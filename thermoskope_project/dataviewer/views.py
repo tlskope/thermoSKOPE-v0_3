@@ -7,7 +7,7 @@ from plotly.graph_objs import Scatter
 from .models import CSVFile, CSVData
 
 def home_view(request):
-    return render(request, 'home.html')
+    return render(request, 'dataviewer/home.html')
 
 def upload_file_view(request):
     if request.method == 'POST':

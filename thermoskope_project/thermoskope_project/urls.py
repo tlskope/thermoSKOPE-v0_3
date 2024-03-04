@@ -1,9 +1,10 @@
+# Import the include function and the home_view we just created
 from django.contrib import admin
 from django.urls import path, include
-from dataviewer.views import home_view  # Import your view
+from dataviewer.views import home_view  # Make sure this matches the location of your view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('dataviewer/', include('dataviewer.urls')),
-    path('', home_view, name='home'),  # Add this line for the root URL
+    path('', home_view, name='home'),  # Route for the homepage
+    path('dataviewer/', include('dataviewer.urls')),  # Including dataviewer app URLs
 ]
