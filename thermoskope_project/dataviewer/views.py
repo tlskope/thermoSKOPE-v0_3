@@ -4,6 +4,10 @@ from .forms import UploadFileForm
 from .models import DataRecord
 from plotly.offline import plot
 from plotly.graph_objs import Scatter
+from .models import CSVFile, CSVData
+
+def home_view(request):
+    return render(request, 'home.html')
 
 def upload_file_view(request):
     if request.method == 'POST':
@@ -34,3 +38,17 @@ def graph_view(request):
                     output_type='div', include_plotlyjs=False, show_link=False, link_text="")
 
     return render(request, 'dataviewer/graph.html', context={'plot_div': plot_div})
+
+def handle_uploaded_file(file, user=None):
+    # Create a CSVFile instance
+    csv_file_instance = CSVFile.objects.create(name=file.name, uploaded_by=user)
+
+    # Read the CSV file into a pandas DataFrame
+    df = pd.read_csv(file)
+
+    # Iterate over the DataFrame and create CSVData instances
+    for index, row in df.iterrows():
+        x_value = row.iloc[0]  # First column as x-value
+        y_value = row.iloc[1:].to_dict()  # Remaining columns as y-values
+        CSVData.objects.create(csv_file=csv_file_instance, x_value=x_value, y_value=y_value)
+
