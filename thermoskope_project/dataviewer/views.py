@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from django.shortcuts import render, redirect
+import plotly.graph_objs as go
 from django.contrib import messages
 from .forms import UploadFileForm
 from .models import CSVFile, CSVData
@@ -26,21 +27,26 @@ def upload_file_view(request):
     return render(request, 'dataviewer/upload.html', {'form': form})
 
 def graph_view(request):
-    # Placeholder for your actual data querying logic
+    # Fetch your data from the database
     queryset = CSVData.objects.all()
     
-    # Assuming 'x_value' is your x-axis and 'y_value' contains y-axis data
-    x_data = [record.x_value for record in queryset]
-    y_data = [record.y_value for record in queryset]  # Adjust based on how you want to use y_value
+    # Assuming 'x_value' is stored as a string representing dates or numbers and 'y_value' is a dictionary
+    # You might need to adjust this part based on your actual data structure
+    x_data = [row.x_value for row in queryset]
+    y_data = [row.y_value for row in queryset]  # Example, adjust as needed
 
-    # Create Plotly graph
-    plot_div = plot([Scatter(x=x_data, y=y_data, mode='lines', name='Data Graph')],
-                    output_type='div', include_plotlyjs=False, show_link=False, link_text="")
+    # Create Plotly figure
+    fig = go.Figure()
 
+    for y in y_data:
+        # Assuming y_data is iterable and contains your y values; adjust as needed
+        fig.add_trace(go.Scatter(x=x_data, y=y, mode='lines'))
+
+    # Convert Plotly figure to HTML div
+    plot_div = plot(fig, output_type='div', include_plotlyjs=True)
+
+    # Pass the plotly div to the template
     return render(request, 'dataviewer/graph.html', context={'plot_div': plot_div})
-
-from django.utils.dateparse import parse_datetime
-
 
 
 def handle_uploaded_file(file, user=None):
