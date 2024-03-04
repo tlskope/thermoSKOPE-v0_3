@@ -1,10 +1,10 @@
 import pandas as pd
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib import messages
 from .forms import UploadFileForm
-from .models import DataRecord
+from .models import CSVFile, CSVData
 from plotly.offline import plot
 from plotly.graph_objs import Scatter
-from .models import CSVFile, CSVData
 
 def home_view(request):
     return render(request, 'dataviewer/home.html')
@@ -14,30 +14,31 @@ def upload_file_view(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             file = request.FILES['file']
-            df = pd.read_csv(file)
-            for index, row in df.iterrows():
-                # Create DataRecord instance for each row and save to database
-                # Adjust field names based on your CSV structure and model
-                DataRecord.objects.create(field1=row['ColumnName1'], field2=row['ColumnName2'])
-            return render(request, 'dataviewer/upload_success.html')
+            try:
+                handle_uploaded_file(file, user=request.user if request.user.is_authenticated else None)
+                return render(request, 'dataviewer/upload_success.html')
+            except KeyError as e:
+                messages.error(request, f'Missing column in uploaded CSV: {e}')
+                return redirect('dataviewer:upload_file')
     else:
         form = UploadFileForm()
     return render(request, 'dataviewer/upload.html', {'form': form})
 
 def graph_view(request):
-    # Query your model for data
-    # This is a placeholder; adjust according to your model and data structure
-    queryset = DataRecord.objects.all()
+    # Placeholder for your actual data querying logic
+    queryset = CSVData.objects.all()
     
-    # Assuming 'field1' is your x-axis and 'field2' is your y-axis
-    x_data = [record.field1 for record in queryset]
-    y_data = [record.field2 for record in queryset]
+    # Assuming 'x_value' is your x-axis and 'y_value' contains y-axis data
+    x_data = [record.x_value for record in queryset]
+    y_data = [record.y_value for record in queryset]  # Adjust based on how you want to use y_value
 
     # Create Plotly graph
-    plot_div = plot([Scatter(x=x_data, y=y_data, mode='lines', name='Test Graph')],
+    plot_div = plot([Scatter(x=x_data, y=y_data, mode='lines', name='Data Graph')],
                     output_type='div', include_plotlyjs=False, show_link=False, link_text="")
 
     return render(request, 'dataviewer/graph.html', context={'plot_div': plot_div})
+
+from django.utils.dateparse import parse_datetime
 
 def handle_uploaded_file(file, user=None):
     # Create a CSVFile instance
@@ -48,7 +49,12 @@ def handle_uploaded_file(file, user=None):
 
     # Iterate over the DataFrame and create CSVData instances
     for index, row in df.iterrows():
-        x_value = row.iloc[0]  # First column as x-value
+        # Parse the first column as a datetime
+        x_value = parse_datetime(row.iloc[0])
+        if not x_value:
+            # Handle cases where the date format is not automatically recognized
+            # This will depend on the specific format of your date strings
+            x_value = pd.to_datetime(row.iloc[0], format='%m/%d/%Y %I:%M %p')
+
         y_value = row.iloc[1:].to_dict()  # Remaining columns as y-values
         CSVData.objects.create(csv_file=csv_file_instance, x_value=x_value, y_value=y_value)
-

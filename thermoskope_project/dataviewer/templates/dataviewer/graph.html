@@ -1,13 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Graph View</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-</head>
-<body>
-    <h1>Graph View</h1>
+{% extends "base.html" %}
+
+{% block title %}Graph - ThermoSKOPE{% endblock %}
+
+{% block content %}
+    <h2>Graph View</h2>
     <div>{{ plot_div|safe }}</div>
-    <a href="/">Go back to the homepage</a>
-</body>
-</html>
+{% endblock content %}

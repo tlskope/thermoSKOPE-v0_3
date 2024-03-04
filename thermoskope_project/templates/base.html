@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Your Site Name{% endblock title %}</title>
+</head>
+<body>
+    <header>
+        <h1><a href="{% url 'home' %}">ThermoSKOPE</a></h1>
+    </header>
+    
+    <nav>
+        <!-- Navigation Links -->
+        <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'dataviewer:upload_file' %}">Upload CSV</a></li>
+            <!-- Add more navigation items here -->
+        </ul>
+    </nav>
+    
+    <main>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}
+        <!-- Page specific content will go here -->
+        {% endblock content %}
+    </main>
+    
+    <footer>
+        <p>&copy; 2024 ThermoSKOPE. All rights reserved.</p>
+    </footer>
+</body>
+</html>

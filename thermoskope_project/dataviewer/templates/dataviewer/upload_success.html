@@ -1,12 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Upload Successful</title>
-</head>
-<body>
-    <h1>Success!</h1>
+{% extends "base.html" %}
+
+{% block title %}Upload Success - ThermoSKOPE{% endblock %}
+
+{% block content %}
+    <h2>Success!</h2>
     <p>Your file has been successfully uploaded.</p>
-    <a href="/dataviewer/upload/">Upload another file</a> | <a href="/dataviewer/graph/">View Graph</a> | <a href="/">Go back to the homepage</a>
-</body>
-</html>
+    <a href="{% url 'dataviewer:upload_file' %}">Upload another file</a> |
+    <a href="{% url 'dataviewer:graph_view' %}">View Graph</a>
+{% endblock content %}
