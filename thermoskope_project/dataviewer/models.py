@@ -18,8 +18,8 @@ class CSVFile(models.Model):
 
 class CSVData(models.Model):
     csv_file = models.ForeignKey(CSVFile, on_delete=models.CASCADE, related_name='data')
-    x_value = models.FloatField()  # Assuming the x-axis is always numeric
-    y_value = models.JSONField()  # Stores remaining columns as a JSON array or object
+    x_value_temp = models.DateTimeField()  # Temporary new field for datetime values
+    y_value = models.JSONField()
 
     def __str__(self):
         return f"Data for {self.csv_file.name} - X Value: {self.x_value}"

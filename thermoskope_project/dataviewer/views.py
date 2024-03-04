@@ -41,20 +41,10 @@ def graph_view(request):
 from django.utils.dateparse import parse_datetime
 
 def handle_uploaded_file(file, user=None):
-    # Create a CSVFile instance
     csv_file_instance = CSVFile.objects.create(name=file.name, uploaded_by=user)
+    df = pd.read_csv(file, parse_dates=[0])  # Assuming the first column contains datetime strings
 
-    # Read the CSV file into a pandas DataFrame
-    df = pd.read_csv(file)
-
-    # Iterate over the DataFrame and create CSVData instances
     for index, row in df.iterrows():
-        # Parse the first column as a datetime
-        x_value = parse_datetime(row.iloc[0])
-        if not x_value:
-            # Handle cases where the date format is not automatically recognized
-            # This will depend on the specific format of your date strings
-            x_value = pd.to_datetime(row.iloc[0], format='%m/%d/%Y %I:%M %p')
-
-        y_value = row.iloc[1:].to_dict()  # Remaining columns as y-values
+        x_value = row.iloc[0]  # This should now be a Timestamp object, suitable for DateTimeField
+        y_value = row.iloc[1:].to_dict()
         CSVData.objects.create(csv_file=csv_file_instance, x_value=x_value, y_value=y_value)
