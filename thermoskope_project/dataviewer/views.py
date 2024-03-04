@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import UploadFileForm
@@ -40,11 +41,21 @@ def graph_view(request):
 
 from django.utils.dateparse import parse_datetime
 
+
+
 def handle_uploaded_file(file, user=None):
     csv_file_instance = CSVFile.objects.create(name=file.name, uploaded_by=user)
-    df = pd.read_csv(file, parse_dates=[0])  # Assuming the first column contains datetime strings
 
+    # Read the CSV file into a pandas DataFrame
+    df = pd.read_csv(file)
+    
+    # Replace NaN values with None (which becomes 'null' in JSON)
+    df.replace({np.nan: None}, inplace=True)
+
+    # Iterate over the DataFrame and create CSVData instances
     for index, row in df.iterrows():
-        x_value = row.iloc[0]  # This should now be a Timestamp object, suitable for DateTimeField
-        y_value = row.iloc[1:].to_dict()
+        x_value = str(row.iloc[0])  # Convert the first column to string
+        y_value = row.iloc[1:].to_dict()  # Convert the remaining columns to a dictionary
+        
+        # Ensure y_value, now potentially containing None values, is saved correctly
         CSVData.objects.create(csv_file=csv_file_instance, x_value=x_value, y_value=y_value)
