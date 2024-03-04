@@ -6,5 +6,5 @@ from dataviewer.views import home_view  # Make sure this matches the location of
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home_view, name='home'),  # Route for the homepage
-    path('dataviewer/', include('dataviewer.urls')),  # Including dataviewer app URLs
+    path('dataviewer/', include(('dataviewer.urls', 'dataviewer'), namespace='dataviewer')),  # Note the namespace
 ]
